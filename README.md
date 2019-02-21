@@ -120,7 +120,9 @@ app.use(cors())
 
 // respond to the manifest request
 app.get('/:listId/manifest.json', (req, res) => {
-    res.send(manifest)
+  res.setHeader('Cache-Control', 'max-age=604800') // one week
+  res.setHeader('Content-Type', 'application/json')
+  res.send(manifest)
 })
 ```
 
@@ -250,12 +252,19 @@ app.get('/:listId/catalog/:type/:id.json', (req, res) => {
     res.end(JSON.stringify({ err: 'handler error' }))
   }
 
+  // handle response
+  function respond(msg) {
+    res.setHeader('Cache-Control', 'max-age=86400') // one day
+    res.setHeader('Content-Type', 'application/json')
+    res.send(msg)
+  }
+
   // handle importing and updating cache
   function fetch() {
     queue.push({ id: req.params.listId }, (err, done) => {
       if (done) {
         const userData = cache[req.params.type][req.params.listId]
-        res.send(JSON.stringify({ metas: userData }))
+        respond(JSON.stringify({ metas: userData }))
       } else 
         fail(err || 'Could not get list items')
     })
@@ -268,7 +277,7 @@ app.get('/:listId/catalog/:type/:id.json', (req, res) => {
     if (cache[req.params.type][req.params.listId]) {
       const userData = cache[req.params.type][req.params.listId]
       if (userData.length)
-        res.send(JSON.stringify({ metas: userData }))
+        respond(JSON.stringify({ metas: userData }))
       else
         fetch()
     } else
