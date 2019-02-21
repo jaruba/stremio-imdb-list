@@ -27,17 +27,18 @@ const manifest = {
 
 const listManifest = {}
 
-app.get('/:listId/manifest.json', (req, res) => {
+app.get('/:listId/:sort?/manifest.json', (req, res) => {
+	const cacheTag = req.params.listId + '[]' + (req.params.sort || 'list_order')
 	function respond() {
-		if (listManifest[req.params.listId]) {
-			res.send(listManifest[req.params.listId])
+		if (listManifest[cacheTag]) {
+			res.send(listManifest[cacheTag])
 			return true
 		} else
 			return false
 	}
 	const responded = respond()
 	if (!responded) {
-		queue.push({ id: req.params.listId }, (err, done) => {
+		queue.push({ id: cacheTag }, (err, done) => {
 			if (done) {
 				const tryAgain = respond()
 				if (tryAgain)
@@ -76,33 +77,54 @@ function toMeta(obj) {
 	}
 }
 
-function getList(listId, cb) {
+const sorts = {
+	'list_order': 'list_order%2Casc',
+	'popularity': 'moviemeter%2Casc',
+	'alphabetical': 'alpha%2Casc',
+	'rating': 'user_rating%2Cdesc',
+	'votes': 'num_votes%2Cdesc',
+	'released': 'release_date%2Cdesc',
+	'date_added': 'date_added%2Cdesc'
+}
+
+const sortsTitle = {
+	'list_order': ' by List Order',
+	'popularity': ' by Popularity',
+	'alphabetical': ' by Alphabetical',
+	'rating': ' by Rating',
+	'votes': ' by Nr Votes',
+	'released': ' by Released Date',
+	'date_added': ' by Date Added'
+}
+
+function getList(listId, sort, cb) {
 	if (listId) {
 		headers.referer = 'https://m.imdb.com/list/'+listId+'/'
-		const getUrl = 'https://m.imdb.com/list/'+listId+'/search?sort=date_added%2Cdesc&view=grid&tracking_tag=&pageId='+listId+'&pageType=list'
+		const getUrl = 'https://m.imdb.com/list/'+listId+'/search?sort='+sorts[sort]+'&view=grid&tracking_tag=&pageId='+listId+'&pageType=list'
 		needle.get(getUrl, { headers }, (err, resp) => {
 			if (!err && resp && resp.body) {
+				const cacheTag = listId + '[]' + sort
 				const jObj = resp.body
 				if (jObj.titles && Object.keys(jObj.titles).length) {
-					manifest.types.forEach(el => { cache[el][listId] = [] })
+					manifest.types.forEach(el => { cache[el][cacheTag] = [] })
 					for (let key in jObj.titles) {
 						const el = jObj.titles[key]
 						const metaType = el.type == 'featureFilm' ? 'movie' : el.type == 'series' ? 'series' : null
 						if (metaType) {
-							cache[metaType][listId].push(toMeta(el))
+							cache[metaType][cacheTag].push(toMeta(el))
 						}
 					}
 					if (jObj.list && jObj.list.name) {
 						const cloneManifest = JSON.parse(JSON.stringify(manifest))
-						cloneManifest.id = 'org.imdblist' + listId
-						cloneManifest.name = jObj.list.name
+						cloneManifest.id = 'org.imdblist' + cacheTag
+						cloneManifest.name = jObj.list.name + sortsTitle[sort]
 						cloneManifest.catalogs.forEach((cat, ij) => {
-							cloneManifest.catalogs[ij].name = jObj.list.name
+							cloneManifest.catalogs[ij].name = jObj.list.name + sortsTitle[sort]
 						})
-						listManifest[listId] = cloneManifest
+						listManifest[cacheTag] = cloneManifest
 					}
 					setTimeout(() => {
-						manifest.types.forEach(el => { cache[el][listId] = [] })
+						manifest.types.forEach(el => { cache[el][cacheTag] = [] })
 					}, 86400000)
 					cb(false, true)
 				} else 
@@ -117,29 +139,32 @@ function getList(listId, cb) {
 const namedQueue = require('named-queue')
 
 const queue = new namedQueue((task, cb) => {
-	getList(task.id, cb)
+	const id = task.id.split('[]')[0]
+	const sort = task.id.split('[]')[1]
+	getList(task.id, sort, cb)
 }, Infinity)
 
 const cache = { movie: {}, series: {} }
 
-app.get('/:listId/catalog/:type/:id.json', (req, res) => {
+app.get('/:listId/:sort?/catalog/:type/:id.json', (req, res) => {
+	const cacheTag = req.params.listId + '[]' + (req.params.sort || 'list_order')
 	function fail(err) {
 		console.error(err)
 		res.writeHead(500)
 		res.end(JSON.stringify({ err: 'handler error' }))
 	}
 	function fetch() {
-		queue.push({ id: req.params.listId }, (err, done) => {
+		queue.push({ id: cacheTag }, (err, done) => {
 			if (done) {
-				const userData = cache[req.params.type][req.params.listId]
+				const userData = cache[req.params.type][cacheTag]
 				res.send(JSON.stringify({ metas: userData }))
 			} else 
 				fail(err || 'Could not get list items')
 		})
 	}
 	if (req.params.listId && ['movie','series'].indexOf(req.params.type) > -1) {
-		if (cache[req.params.type][req.params.listId]) {
-			const userData = cache[req.params.type][req.params.listId]
+		if (cache[req.params.type][cacheTag]) {
+			const userData = cache[req.params.type][cacheTag]
 			if (userData.length)
 				res.send(JSON.stringify({ metas: userData }))
 			else
