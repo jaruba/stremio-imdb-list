@@ -94,8 +94,8 @@ function getList(listId, cb) {
 					}
 					if (jObj.list && jObj.list.name) {
 						const cloneManifest = JSON.parse(JSON.stringify(manifest))
-						manifest.id = 'org.imdblist' + listId
-						manifest.name = jObj.list.name
+						cloneManifest.id = 'org.imdblist' + listId
+						cloneManifest.name = jObj.list.name
 						cloneManifest.catalogs.forEach((cat, ij) => {
 							cloneManifest.catalogs[ij].name = jObj.list.name
 						})
