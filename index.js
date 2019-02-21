@@ -93,7 +93,7 @@ const sortsTitle = {
 	'alphabetical': ' by Alphabetical',
 	'rating': ' by Rating',
 	'votes': ' by Nr Votes',
-	'released': ' by Released Date',
+	'released': ' by Release Date',
 	'date_added': ' by Date Added'
 }
 
@@ -141,7 +141,7 @@ const namedQueue = require('named-queue')
 const queue = new namedQueue((task, cb) => {
 	const id = task.id.split('[]')[0]
 	const sort = task.id.split('[]')[1]
-	getList(task.id, sort, cb)
+	getList(id, sort, cb)
 }, Infinity)
 
 const cache = { movie: {}, series: {} }
