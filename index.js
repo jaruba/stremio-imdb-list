@@ -122,6 +122,4 @@ app.get('/:listId/catalog/:type/:id.json', (req, res) => {
 		fail('Unknown request parameters')
 })
 
-app.listen(7515, () => {
-    console.log('http://127.0.0.1:7515/[imdb-list-id]/manifest.json')
-})
+module.exports = app
