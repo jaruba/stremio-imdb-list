@@ -27,6 +27,17 @@ Use `https://stremio-imdb-list.now.sh/[imdb-list-id]/manifest.json`. Add a IMDB 
 Presuming that the list you want to add is `https://www.imdb.com/list/ls058289969/`, the IMDB list id in this case is `ls058289969`.
 
 
+## Sorting Lists
+
+You can also sort these lists, supported sorting tags: `list_order`, `popularity`, `alphabetical`, `rating`, `votes`, `released`, `date_added`
+
+The default sorting is: `list_order`
+
+To get a list of sorted items, use: `https://stremio-imdb-list.now.sh/[imdb-list-id]/[tag-id]/manifest.json`
+
+Example: `https://stremio-imdb-list.now.sh/ls058289969/alphabetical/manifest.json`
+
+
 ## How this add-on was made
 
 
