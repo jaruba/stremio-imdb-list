@@ -29,22 +29,27 @@ const listManifest = {}
 
 app.get('/:listId/:sort?/manifest.json', (req, res) => {
 	const cacheTag = req.params.listId + '[]' + (req.params.sort || 'list_order')
-	function respond() {
+	function respond(msg) {
+		res.setHeader('Cache-Control', 'max-age=86400') // one day
+		res.setHeader('Content-Type', 'application/json')
+		res.send(msg)
+	}
+	function try() {
 		if (listManifest[cacheTag]) {
-			res.send(listManifest[cacheTag])
+			respond(listManifest[cacheTag])
 			return true
 		} else
 			return false
 	}
-	const responded = respond()
+	const responded = try()
 	if (!responded) {
 		queue.push({ id: cacheTag }, (err, done) => {
 			if (done) {
-				const tryAgain = respond()
+				const tryAgain = try()
 				if (tryAgain)
 					return
 			}
-			res.send(manifest)
+			respond(manifest)
 		})
 	}
 })
@@ -153,11 +158,16 @@ app.get('/:listId/:sort?/catalog/:type/:id.json', (req, res) => {
 		res.writeHead(500)
 		res.end(JSON.stringify({ err: 'handler error' }))
 	}
+	function respond(msg) {
+		res.setHeader('Cache-Control', 'max-age=86400') // one day
+		res.setHeader('Content-Type', 'application/json')
+		res.send(msg)
+	}
 	function fetch() {
 		queue.push({ id: cacheTag }, (err, done) => {
 			if (done) {
 				const userData = cache[req.params.type][cacheTag]
-				res.send(JSON.stringify({ metas: userData }))
+				respond(JSON.stringify({ metas: userData }))
 			} else 
 				fail(err || 'Could not get list items')
 		})
@@ -166,7 +176,7 @@ app.get('/:listId/:sort?/catalog/:type/:id.json', (req, res) => {
 		if (cache[req.params.type][cacheTag]) {
 			const userData = cache[req.params.type][cacheTag]
 			if (userData.length)
-				res.send(JSON.stringify({ metas: userData }))
+				respond(JSON.stringify({ metas: userData }))
 			else
 				fetch()
 		} else
