@@ -34,18 +34,18 @@ app.get('/:listId/:sort?/manifest.json', (req, res) => {
 		res.setHeader('Content-Type', 'application/json')
 		res.send(msg)
 	}
-	function try() {
+	function tryRespond() {
 		if (listManifest[cacheTag]) {
 			respond(listManifest[cacheTag])
 			return true
 		} else
 			return false
 	}
-	const responded = try()
+	const responded = tryRespond()
 	if (!responded) {
 		queue.push({ id: cacheTag }, (err, done) => {
 			if (done) {
-				const tryAgain = try()
+				const tryAgain = tryRespond()
 				if (tryAgain)
 					return
 			}
