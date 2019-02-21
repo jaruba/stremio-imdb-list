@@ -168,7 +168,7 @@ function getList(type, listId, cb) {
 		headers.referer = 'https://m.imdb.com/list/'+listId+'/'
 
 		// this is our ajax call, based on IMDB list ID
-		const getUrl = 'https://m.imdb.com/list/'+listId+'/search?sort=date_added%2Cdesc&view=grid&tracking_tag=&pageId=ls009966268&pageType=list'
+		const getUrl = 'https://m.imdb.com/list/'+listId+'/search?sort=date_added%2Cdesc&view=grid&tracking_tag=&pageId='+listId+'&pageType=list'
 
 		needle.get(getUrl, { headers }, (err, resp) => {
 			if (!err && resp && resp.body) {
