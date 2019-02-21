@@ -60,7 +60,7 @@ function toMeta(obj) {
 function getList(type, listId, cb) {
 	if (listId) {
 		headers.referer = 'https://m.imdb.com/list/'+listId+'/'
-		const getUrl = 'https://m.imdb.com/list/'+listId+'/search?sort=date_added%2Cdesc&view=grid&tracking_tag=&pageId=ls009966268&pageType=list'
+		const getUrl = 'https://m.imdb.com/list/'+listId+'/search?sort=date_added%2Cdesc&view=grid&tracking_tag=&pageId='+listId+'&pageType=list'
 		needle.get(getUrl, { headers }, (err, resp) => {
 			if (!err && resp && resp.body) {
 				const jObj = resp.body
