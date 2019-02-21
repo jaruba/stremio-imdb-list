@@ -95,6 +95,7 @@ function getList(listId, cb) {
 					if (jObj.list && jObj.list.name) {
 						const cloneManifest = JSON.parse(JSON.stringify(manifest))
 						cloneManifest.catalogs.forEach((cat, ij) => {
+							cloneManifest.catalogs[ij].name = (cloneManifest.catalogs[ij].type == 'movie' ? 'Movies' : 'Series') + ': ' + jObj.list.name
 						})
 						listManifest[listId] = cloneManifest
 					}
