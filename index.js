@@ -25,8 +25,27 @@ const manifest = {
 	]
 }
 
+const listManifest = {}
+
 app.get('/:listId/manifest.json', (req, res) => {
-    res.send(manifest)
+	function respond() {
+		if (listManifest[req.params.listId]) {
+			res.send(listManifest)
+			return true
+		} else
+			return false
+	}
+	const responded = respond()
+	if (!responded) {
+		queue.push({ id: req.params.listId, type: req.params.type }, (err, done) => {
+			if (done) {
+				const tryAgain = respond()
+				if (tryAgain)
+					return
+			}
+			res.send(manifest)
+		})
+	}
 })
 
 const needle = require('needle')
@@ -72,6 +91,12 @@ function getList(type, listId, cb) {
 						if (metaType) {
 							cache[metaType][listId].push(toMeta(el))
 						}
+					}
+					if (jObj.list && jObj.list.name) {
+						const cloneManifest = JSON.parse(JSON.stringify(manifest))
+						cloneManifest.catalogs.forEach((cat, ij) => {
+						})
+						listManifest[listId] = cloneManifest
 					}
 					setTimeout(() => {
 						manifest.types.forEach(el => { cache[el][listId] = [] })
