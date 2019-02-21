@@ -30,7 +30,7 @@ const listManifest = {}
 app.get('/:listId/manifest.json', (req, res) => {
 	function respond() {
 		if (listManifest[req.params.listId]) {
-			res.send(listManifest)
+			res.send(listManifest[req.params.listId])
 			return true
 		} else
 			return false
