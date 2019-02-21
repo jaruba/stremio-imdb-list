@@ -57,7 +57,7 @@ function toMeta(obj) {
 	}
 }
 
-function getList(type, listId, cb) {
+function getList(listId, cb) {
 	if (listId) {
 		headers.referer = 'https://m.imdb.com/list/'+listId+'/'
 		const getUrl = 'https://m.imdb.com/list/'+listId+'/search?sort=date_added%2Cdesc&view=grid&tracking_tag=&pageId='+listId+'&pageType=list'
@@ -89,7 +89,7 @@ function getList(type, listId, cb) {
 const namedQueue = require('named-queue')
 
 const queue = new namedQueue((task, cb) => {
-	getList(task.type, task.id, cb)
+	getList(task.id, cb)
 }, Infinity)
 
 const cache = { movie: {}, series: {} }
@@ -101,7 +101,7 @@ app.get('/:listId/catalog/:type/:id.json', (req, res) => {
 		res.end(JSON.stringify({ err: 'handler error' }))
 	}
 	function fetch() {
-		queue.push({ id: req.params.listId, type: req.params.type }, (err, done) => {
+		queue.push({ id: req.params.listId }, (err, done) => {
 			if (done) {
 				const userData = cache[req.params.type][req.params.listId]
 				res.send(JSON.stringify({ metas: userData }))

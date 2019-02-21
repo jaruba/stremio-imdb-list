@@ -159,7 +159,7 @@ const headers = {
 const cache = { movie: {}, series: {} }
 
 // we make a function to handle fetching the IMDB list
-function getList(type, listId, cb) {
+function getList(listId, cb) {
 
   if (listId) {
 
@@ -225,7 +225,7 @@ We create the catalog handler, get the list id from the user as it's part of the
 const namedQueue = require('named-queue')
 
 const queue = new namedQueue((task, cb) => {
-  getList(task.type, task.id, cb)
+  getList(task.id, cb)
 }, Infinity)
 
 // users pass the list id in the add-on url
@@ -241,7 +241,7 @@ app.get('/:listId/catalog/:type/:id.json', (req, res) => {
 
   // handle importing and updating cache
   function fetch() {
-    queue.push({ id: req.params.listId, type: req.params.type }, (err, done) => {
+    queue.push({ id: req.params.listId }, (err, done) => {
       if (done) {
         const userData = cache[req.params.type][req.params.listId]
         res.send(JSON.stringify({ metas: userData }))
