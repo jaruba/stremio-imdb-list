@@ -50,7 +50,7 @@ Presuming that the list you want to add is `https://www.imdb.com/list/ls05828996
 }
 ```
 
-We will use `needle` to make the ajax request, `express` to create the add-on http server, `cors` to easily add CORS to our http server responses and `named-queue` because although we'll get two catalog requests (one for movies and one for series), we only need to do one ajax request as IMDB lists include both. That's what `named-queue` comes in, as it merges tasks by `id`, so we only do one ajax request to respond to both catalog requests.
+We will use `needle` to make the ajax request, `express` to create the add-on http server, `cors` to easily add CORS to our http server responses and `named-queue` because although we'll get two catalog requests (one for movies and one for series), we only need to do one ajax request as IMDB lists include both. That's where `named-queue` comes in, as it merges tasks by `id`, so we only do one ajax request to respond to both catalog requests.
 
 
 ### 2. Add-on manifest
