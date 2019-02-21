@@ -14,12 +14,12 @@ npm i
 npm start
 ```
 
-This will print `http://127.0.0.1:7515/[imdb-list-id]/manifest.json`. Add a IMDB list id instead of `[imdb-list-id]` in this URL and load the add-on in Stremio.
+This will print `http://127.0.0.1:7515/[imdb-list-id]/manifest.json`. Add a IMDB list id instead of `[imdb-list-id]` in this URL and [load the add-on in Stremio](https://github.com/jaruba/stremio-imdb-list#6-install-add-on-in-stremio).
 
 
 ## Using remotely
 
-Use `https://stremio-imdb-list.now.sh/[imdb-list-id]/manifest.json`. Add a IMDB list id instead of `[imdb-list-id]` in this URL and load the add-on in Stremio.
+Use `https://stremio-imdb-list.now.sh/[imdb-list-id]/manifest.json`. Add a IMDB list id instead of `[imdb-list-id]` in this URL and [load the add-on in Stremio](https://github.com/jaruba/stremio-imdb-list#6-install-add-on-in-stremio).
 
 
 ## What is a IMDB List ID
@@ -34,19 +34,19 @@ Presuming that the list you want to add is `https://www.imdb.com/list/ls05828996
 
 ```json
 {
-	"name": "stremio-imdb-list",
-	"version": "0.0.1",
-	"description": "Add-on to create a Stremio catalog from a IMDB list.",
-	"main": "index.js",
-	"scripts": {
-		"start": "node index.js"
-	},
-	"dependencies": {
-		"needle": "^2.2.4",
-		"express": "^4.16.4",
-		"cors": "^2.8.5",
-		"named-queue": "^2.2.1"
-	}
+  "name": "stremio-imdb-list",
+  "version": "0.0.1",
+  "description": "Add-on to create a Stremio catalog from a IMDB list.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "needle": "^2.2.4",
+    "express": "^4.16.4",
+    "cors": "^2.8.5",
+    "named-queue": "^2.2.1"
+  }
 }
 ```
 
@@ -62,41 +62,41 @@ Create an `index.js` file:
 ```javascript
 const manifest = {
 
-	// set add-on id, any string unique between add-ons
-	id: 'org.imdblist',
+  // set add-on id, any string unique between add-ons
+  id: 'org.imdblist',
 
-	// setting a semver add-on version is mandatory
-	version: '0.0.1',
+  // setting a semver add-on version is mandatory
+  version: '0.0.1',
 
-	// human readable add-on name
-	name: 'IMDB List Add-on',
+  // human readable add-on name
+  name: 'IMDB List Add-on',
 
-	// description of the add-on
-	description: 'Add-on to create a catalog from a IMDB list.',
+  // description of the add-on
+  description: 'Add-on to create a catalog from a IMDB list.',
 
-	// we only need 'catalog' for this add-on, can also be 'meta', 'stream' and 'subtitles'
-	resources: ['catalog'],
+  // we only need 'catalog' for this add-on, can also be 'meta', 'stream' and 'subtitles'
+  resources: ['catalog'],
 
-	// we set the add-on types, can also be 'tv', 'channel' and 'other'
-	types: ['movie', 'series'],
+  // we set the add-on types, can also be 'tv', 'channel' and 'other'
+  types: ['movie', 'series'],
 
-	// we define our catalogs, we'll make one for 'movies' and one for 'series'
-	catalogs: [
-		{
-			// id of catalog, any string unique between this add-ons catalogs
-			id: 'imdb-movie-list',
+  // we define our catalogs, we'll make one for 'movies' and one for 'series'
+  catalogs: [
+    {
+      // id of catalog, any string unique between this add-ons catalogs
+      id: 'imdb-movie-list',
 
-			// human readable catalog name
-			name: 'IMDB Movie List',
+      // human readable catalog name
+      name: 'IMDB Movie List',
 
-			// the type of this catalog provides
-			type: 'movie'
-		}, {
-			id: 'imdb-series-list',
-			name: 'IMDB Series List',
-			type: 'series'
-		}
-	]
+      // the type of this catalog provides
+      type: 'movie'
+    }, {
+      id: 'imdb-series-list',
+      name: 'IMDB Series List',
+      type: 'series'
+    }
+  ]
 }
 
 // create add-on server
@@ -121,38 +121,38 @@ Now we need to get the list items based on list id (we'll use an ajax call for t
 // we'll use a helper function to resize IMDB posters
 // their normally too big for catalog responses
 function imageResize(posterUrl, width) {
-	if (!posterUrl) return null
-	if (!posterUrl.includes('amazon.com') && !posterUrl.includes('imdb.com')) return posterUrl
-	if (posterUrl.includes('._V1_.')) posterUrl = posterUrl.replace('._V1_.', '._V1_SX' + width + '.')
-	else if (posterUrl.includes('._V1_')) {
-		var extension = posterUrl.split('.').pop()
-		posterUrl = posterUrl.substr(0,posterUrl.indexOf('._V1_')) + '._V1_SX' + width + '.' + extension
-	}
-	return posterUrl
+  if (!posterUrl) return null
+  if (!posterUrl.includes('amazon.com') && !posterUrl.includes('imdb.com')) return posterUrl
+  if (posterUrl.includes('._V1_.')) posterUrl = posterUrl.replace('._V1_.', '._V1_SX' + width + '.')
+  else if (posterUrl.includes('._V1_')) {
+    var extension = posterUrl.split('.').pop()
+    posterUrl = posterUrl.substr(0,posterUrl.indexOf('._V1_')) + '._V1_SX' + width + '.' + extension
+  }
+  return posterUrl
 }
 
 // we'll also need a function to convert the IMDB List
 // items to a Stremio Meta object
 function toMeta(obj) {
-	// we need minimal data for catalogs, we'll set the IMDB id as
-	// the meta object id, so the cinemeta add-on can handle the
-	// meta requests for them afterwards
-	return {
-		id: obj.id || null,
-		name: obj.primary && obj.primary.title ? obj.primary.title : null,
-		poster: obj.poster && obj.poster.url ? imageResize(obj.poster.url, 250) : null,
-		type: obj.type == 'featureFilm' ? 'movie' : 'series'
-	}
+  // we need minimal data for catalogs, we'll set the IMDB id as
+  // the meta object id, so the cinemeta add-on can handle the
+  // meta requests for them afterwards
+  return {
+    id: obj.id || null,
+    name: obj.primary && obj.primary.title ? obj.primary.title : null,
+    poster: obj.poster && obj.poster.url ? imageResize(obj.poster.url, 250) : null,
+    type: obj.type == 'featureFilm' ? 'movie' : 'series'
+  }
 }
 
 const needle = require('needle')
 
 // request headers for the ajax call
 const headers = {
-	// we set the user agent of Chrome on Android
-	'User-Agent': 'Mozilla/5.0 (Linux; Android 8.0.0; TA-1053 Build/OPR1.170623.026) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3368.0 Mobile Safari/537.36',
-	// we set the language we expect from the page
-	'Accept-Language': 'en-US,en;q=0.8',
+  // we set the user agent of Chrome on Android
+  'User-Agent': 'Mozilla/5.0 (Linux; Android 8.0.0; TA-1053 Build/OPR1.170623.026) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3368.0 Mobile Safari/537.36',
+  // we set the language we expect from the page
+  'Accept-Language': 'en-US,en;q=0.8',
 }
 
 // declare our cache object
@@ -161,55 +161,55 @@ const cache = { movie: {}, series: {} }
 // we make a function to handle fetching the IMDB list
 function getList(type, listId, cb) {
 
-	if (listId) {
+  if (listId) {
 
-		// we set the normal url of IMDB lists as the
-		// referer for the request
-		headers.referer = 'https://m.imdb.com/list/'+listId+'/'
+    // we set the normal url of IMDB lists as the
+    // referer for the request
+    headers.referer = 'https://m.imdb.com/list/'+listId+'/'
 
-		// this is our ajax call, based on IMDB list ID
-		const getUrl = 'https://m.imdb.com/list/'+listId+'/search?sort=date_added%2Cdesc&view=grid&tracking_tag=&pageId=ls009966268&pageType=list'
+    // this is our ajax call, based on IMDB list ID
+    const getUrl = 'https://m.imdb.com/list/'+listId+'/search?sort=date_added%2Cdesc&view=grid&tracking_tag=&pageId='+listId+'&pageType=list'
 
-		needle.get(getUrl, { headers }, (err, resp) => {
-			if (!err && resp && resp.body) {
-				// our request is successful and we have a body
-				const jObj = resp.body
-				if (jObj.titles && Object.keys(jObj.titles).length) {
+    needle.get(getUrl, { headers }, (err, resp) => {
+      if (!err && resp && resp.body) {
+        // our request is successful and we have a body
+        const jObj = resp.body
+        if (jObj.titles && Object.keys(jObj.titles).length) {
 
-					// this list has items
+          // this list has items
 
-					// we empty the cache for this list
-					manifest.types.forEach(el => { cache[el][listId] = [] })
+          // we empty the cache for this list
+          manifest.types.forEach(el => { cache[el][listId] = [] })
 
-					// iterate through items object and add to our cache
-					for (let key in jObj.titles) {
-						const el = jObj.titles[key]
-						const metaType = el.type == 'featureFilm' ? 'movie' : el.type == 'series' ? 'series' : null
-						if (metaType) {
-							cache[metaType][listId].push(toMeta(el))
-						}
-					}
+          // iterate through items object and add to our cache
+          for (let key in jObj.titles) {
+            const el = jObj.titles[key]
+            const metaType = el.type == 'featureFilm' ? 'movie' : el.type == 'series' ? 'series' : null
+            if (metaType) {
+              cache[metaType][listId].push(toMeta(el))
+            }
+          }
 
-					// remove cache after 1 day
-					setTimeout(() => {
-						manifest.types.forEach(el => { cache[el][listId] = [] })
-					}, 86400000)
+          // remove cache after 1 day
+          setTimeout(() => {
+            manifest.types.forEach(el => { cache[el][listId] = [] })
+          }, 86400000)
 
-					// respond with no error, cache has been updated succesfully
-					cb(false, true)
-				} else {
-					// send error
-					cb('Parsing error on ajax call')
-				}
-			} else {
-				// send error
-				cb(err || 'Error on requesting ajax call')
-			}
-		})
-	} else {
-		// send error
-		cb('No list id')
-	}
+          // respond with no error, cache has been updated succesfully
+          cb(false, true)
+        } else {
+          // send error
+          cb('Parsing error on ajax call')
+        }
+      } else {
+        // send error
+        cb(err || 'Error on requesting ajax call')
+      }
+    })
+  } else {
+    // send error
+    cb('No list id')
+  }
 }
 ```
 
@@ -225,46 +225,46 @@ We create the catalog handler, get the list id from the user as it's part of the
 const namedQueue = require('named-queue')
 
 const queue = new namedQueue((task, cb) => {
-	getList(task.type, task.id, cb)
+  getList(task.type, task.id, cb)
 }, Infinity)
 
 // users pass the list id in the add-on url
 // this will be available as `req.params.listId`
 app.get('/:listId/catalog/:type/:id.json', (req, res) => {
 
-	// handle failures
-	function fail(err) {
-		console.error(err)
-		res.writeHead(500)
-		res.end(JSON.stringify({ err: 'handler error' }))
-	}
+  // handle failures
+  function fail(err) {
+    console.error(err)
+    res.writeHead(500)
+    res.end(JSON.stringify({ err: 'handler error' }))
+  }
 
-	// handle importing and updating cache
-	function fetch() {
-		queue.push({ id: req.params.listId, type: req.params.type }, (err, done) => {
-			if (done) {
-				const userData = cache[req.params.type][req.params.listId]
-				res.send(JSON.stringify({ metas: userData }))
-			} else 
-				fail(err || 'Could not get list items')
-		})
-	}
+  // handle importing and updating cache
+  function fetch() {
+    queue.push({ id: req.params.listId, type: req.params.type }, (err, done) => {
+      if (done) {
+        const userData = cache[req.params.type][req.params.listId]
+        res.send(JSON.stringify({ metas: userData }))
+      } else 
+        fail(err || 'Could not get list items')
+    })
+  }
 
-	// ensure request parameters are known
-	if (req.params.listId && ['movie','series'].indexOf(req.params.type) > -1) {
+  // ensure request parameters are known
+  if (req.params.listId && ['movie','series'].indexOf(req.params.type) > -1) {
 
-		// if we already have it in the cache, use the cache
-		if (cache[req.params.type][req.params.listId]) {
-			const userData = cache[req.params.type][req.params.listId]
-			if (userData.length)
-				res.send(JSON.stringify({ metas: userData }))
-			else
-				fetch()
-		} else
-			fetch()
+    // if we already have it in the cache, use the cache
+    if (cache[req.params.type][req.params.listId]) {
+      const userData = cache[req.params.type][req.params.listId]
+      if (userData.length)
+        res.send(JSON.stringify({ metas: userData }))
+      else
+        fetch()
+    } else
+      fetch()
 
-	} else
-		fail('Unknown request parameters')
+  } else
+    fail('Unknown request parameters')
 })
 ```
 
