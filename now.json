@@ -5,11 +5,19 @@
   ],
   "routes": [
     {
+        "src": "/(?<list>[^/]*)/(?<sort>[^/]*)/manifest.json",
+        "dest": "/manifest.js"
+    },
+    {
         "src": "/(?<list>[^/]*)/manifest.json",
         "dest": "/manifest.js"
     },
     {
-        "src": "/(?<list>[^/]*)/(?<resource>[^/]*)/.*",
+        "src": "/(?<list>[^/]*)/(?<sort>[^/]*)/(?<resource>[^/]*)/(?<type>[^/]*)/(?<id>[^/]*).json",
+        "dest": "/$resource.js"
+    },
+    {
+        "src": "/(?<list>[^/]*)/(?<resource>[^/]*)/(?<type>[^/]*)/(?<id>[^/]*).json",
         "dest": "/$resource.js"
     }
   ]
