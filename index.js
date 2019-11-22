@@ -1,8 +1,11 @@
+
 const express = require('express')
 const app = express()
 const cors = require('cors')
 const qs = require('querystring')
+
 app.use(cors())
+
 const manifest = {
 	id: 'org.imdblist',
 	version: '0.0.2',
@@ -26,6 +29,7 @@ const manifest = {
 		}
 	]
 }
+
 const listManifest = {}
 app.get('/:listId/:sort?/manifest.json', (req, res) => {
 	const cacheTag = req.params.listId + '[]' + (req.params.sort || 'list_order')
@@ -53,11 +57,14 @@ app.get('/:listId/:sort?/manifest.json', (req, res) => {
 		})
 	}
 })
+
 const needle = require('needle')
+
 const headers = {
 	'User-Agent': 'Mozilla/5.0 (Linux; Android 8.0.0; TA-1053 Build/OPR1.170623.026) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3368.0 Mobile Safari/537.36',
 	'Accept-Language': 'en-US,en;q=0.8',
 }
+
 function imageResize(posterUrl, width) {
 	if (!posterUrl) return null
 	if (!posterUrl.includes('amazon.com') && !posterUrl.includes('imdb.com')) return posterUrl
@@ -68,9 +75,11 @@ function imageResize(posterUrl, width) {
 	}
 	return posterUrl
 }
+
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
 function toMeta(obj) {
 	const titleYear = obj.primary.year && obj.primary.year[0] ? obj.primary.year.length > 1 ? ' (' + obj.primary.year[0] + '-' + obj.primary.year[1] + ')' : ' (' + obj.primary.year[0] + ')' : ''
 	let description = ''
@@ -94,6 +103,7 @@ function toMeta(obj) {
 		description
 	}
 }
+
 const sorts = {
 	'list_order': 'list_order%2Casc',
 	'popularity': 'moviemeter%2Casc',
@@ -103,6 +113,7 @@ const sorts = {
 	'released': 'release_date%2Cdesc',
 	'date_added': 'date_added%2Cdesc'
 }
+
 const sortsTitle = {
 	'list_order': ' by List Order',
 	'popularity': ' by Popularity',
@@ -114,6 +125,7 @@ const sortsTitle = {
 }
 
 const namedQueue = require('named-queue')
+
 const queue = new namedQueue((task, cb) => {
 	const listId = task.id.split('[]')[0]
 	const sort = task.id.split('[]')[1]
@@ -162,7 +174,9 @@ const queue = new namedQueue((task, cb) => {
 	} else
 		cb('No list id')
 }, Infinity)
+
 const cache = {}
+
 app.get('/:listId/:sort?/catalog/:type/:id/:extra?.json', (req, res) => {
 	const extra = req.params.extra ? qs.parse(req.url.split('/').pop().slice(0, -5)) : {}
 	const skip = extra.skip ? parseInt(extra.skip) : 0
@@ -193,4 +207,5 @@ app.get('/:listId/:sort?/catalog/:type/:id/:extra?.json', (req, res) => {
 	} else
 		fail('Unknown request parameters')
 })
+
 module.exports = app
