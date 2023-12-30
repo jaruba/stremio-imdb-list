@@ -14,7 +14,7 @@ npm i
 npm start
 ```
 
-This will print `http://127.0.0.1:7515/[imdb-list-id]/manifest.json`. Add a IMDB list id instead of `[imdb-list-id]` in this URL and [load the add-on in Stremio](https://github.com/jaruba/stremio-imdb-list#6-install-add-on-in-stremio).
+This will print `http://127.0.0.1:7515/[imdb-list-id]ls058289969/manifest.json`. Add a IMDB list id instead of `[imdb-list-id]` in this URL and [load the add-on in Stremio](https://github.com/jaruba/stremio-imdb-list#6-install-add-on-in-stremio).
 
 
 ## Using remotely
